@@ -5,6 +5,10 @@ app.use(express.json());
 
 const cors = require("cors");
 
+// Filesystem module
+var fs = require("fs");
+var dir = "./tmp";
+
 app.use(
   cors({
     origin: "*",
@@ -16,9 +20,18 @@ app.get("/", function (req, res) {
 });
 
 app.post("/data", function (req, res) {
-  //console.log(req.body.name);
-  //console.log(req.body.email);
-  console.log(req.body);
+  // remove directory and files if exists
+  fs.rmSync(dir, { recursive: true, force: true });
+  // create directory
+  fs.mkdirSync(dir);
+
+  //filter post data
+  Object.keys(req.body).map((key, index) => {
+    req.body[key].map((submission) =>
+      //console.log(submission),
+      console.log(submission.users.username)
+    );
+  });
 });
 
 app.listen(3001, function () {

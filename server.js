@@ -27,9 +27,29 @@ app.post("/data", function (req, res) {
 
   //filter post data
   Object.keys(req.body).map((key, index) => {
-    req.body[key].map((submission) =>
-      //console.log(submission),
-      console.log(submission.users.username)
+    req.body[key].map(
+      (submission) => {
+        //create directory for each user
+        if (!fs.existsSync(dir + "/" + submission.users.username)) {
+          fs.mkdirSync(dir + "/" + submission.users.username, {
+            recursive: true,
+          });
+        }
+        // fs.writeFile(dir + "/" + submission.users.username + "/" + submission.id + ".pl", submission.code, function (err,data));
+
+        fs.writeFile(
+          dir + "/" + submission.users.username + "/" + submission.id + ".pl",
+          submission.code,
+          function (err, data) {
+            if (err) {
+              return console.log(err);
+            }
+            console.log(data);
+          }
+        );
+      }
+
+      //console.log(submission.users.username)
     );
   });
 });

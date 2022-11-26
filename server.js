@@ -35,11 +35,15 @@ app.post("/data", function (req, res) {
             recursive: true,
           });
         }
-        // fs.writeFile(dir + "/" + submission.users.username + "/" + submission.id + ".pl", submission.code, function (err,data));
 
+        // decode base64 code
+        var base64 = submission.code;
+        var decoded = Buffer.from(base64, "base64"); // Ta-da
+
+        //create submissions
         fs.writeFile(
           dir + "/" + submission.users.username + "/" + submission.id + ".pl",
-          submission.code,
+          decoded,
           function (err, data) {
             if (err) {
               return console.log(err);

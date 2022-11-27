@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
+var _ = require("lodash");
 app.use(express.json());
 
 const cors = require("cors");
@@ -20,6 +21,10 @@ app.get("/", function (req, res) {
 });
 
 app.post("/data", function (req, res) {
+  var array = [];
+  var array2 = [];
+  var array3 = [];
+  var i;
   // remove directory and files if exists
   fs.rmSync(dir, { recursive: true, force: true });
   // create directory
@@ -36,28 +41,86 @@ app.post("/data", function (req, res) {
           });
         }
 
+        //create directory for problem in each user
+        if (
+          !fs.existsSync(
+            dir + "/" + submission.users.username + "/" + submission.problem.id
+          )
+        ) {
+          fs.mkdirSync(
+            dir + "/" + submission.users.username + "/" + submission.problem.id,
+            {
+              recursive: true,
+            }
+          );
+        }
+
         // decode base64 code
         var base64 = submission.code;
-        var decoded = Buffer.from(base64, "base64"); // Ta-da
+        var decoded = Buffer.from(base64, "base64");
 
         //create submissions
         fs.writeFile(
-          dir + "/" + submission.users.username + "/" + submission.id + ".pl",
+          dir +
+            "/" +
+            submission.users.username +
+            "/" +
+            submission.problem.id +
+            "/" +
+            submission.id +
+            ".pl",
           decoded,
           function (err, data) {
             if (err) {
               return console.log(err);
             }
-            console.log(data);
+            //console.log(data);
           }
         );
+
+        //array object with submissions and exec_paths
+        let item = {
+          problem: submission.problem.id,
+          user: submission.users.username,
+          language: submission.language.mode,
+          exec_path:
+            dir +
+            "/" +
+            submission.users.username +
+            "/" +
+            submission.problem.id +
+            "/" +
+            submission.id +
+            ".pl",
+          date: submission.date,
+        };
+
+        array.push(item);
       }
 
       //console.log(submission.users.username)
     );
   });
+
+  array2 = _.groupBy(array, "problem");
+  //console.log(array2);
+
+  let result = "";
+  for (let properties in array2) {
+    //console.log(properties);
+    for (let i = 0; i < array2[properties].length; i++) {
+      result = result.concat(" " + array2[properties][i].exec_path);
+    }
+    let item2 = {
+      problem: properties,
+      exec_path: result,
+    };
+    array3.push(item2);
+    result = "";
+  }
+  console.log(array3);
 });
 
 app.listen(3001, function () {
-  console.log("Server started on port 3001");
+  //console.log("Server started on port 3001");
 });

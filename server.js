@@ -6,6 +6,8 @@ app.use(express.json());
 
 const cors = require("cors");
 
+const { exec } = require("child_process");
+
 // Filesystem module
 var fs = require("fs");
 var dir = "./tmp";
@@ -105,6 +107,7 @@ app.post("/data", function (req, res) {
   array2 = _.groupBy(array, "problem");
   //console.log(array2);
 
+  // Build new object with exec path for each problem
   let result = "";
   for (let properties in array2) {
     //console.log(properties);
@@ -118,8 +121,41 @@ app.post("/data", function (req, res) {
     array3.push(item2);
     result = "";
   }
-  console.log(array3);
+  //console.log(array3);
+
+  make_tests(array3);
 });
+
+// sleep time expects milliseconds
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function make_tests(array3) {
+  sleep(500).then(() => {
+    // Do something after the sleep!
+    for (let problems in array3) {
+      //console.log(array3[problems].exec_path);
+      exec(
+        "./sim_prol -p " + array3[problems].exec_path,
+        (error, stdout, stderr) => {
+          if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+          }
+          if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+          }
+          //console.log("./sim_prol -p " + array3[problems].exec_path);
+          //stddout
+          console.log("Problem " + array3[problems].problem + ":");
+          console.log(`${stdout}`);
+        }
+      );
+    }
+  });
+}
 
 app.listen(3001, function () {
   //console.log("Server started on port 3001");

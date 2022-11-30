@@ -11,6 +11,7 @@ const { exec } = require("child_process");
 // Filesystem module
 var fs = require("fs");
 var dir = "./tmp";
+var resultado = [];
 
 app.use(
   cors({
@@ -121,7 +122,7 @@ app.post("/data", function (req, res) {
     array3.push(item2);
     result = "";
   }
-  //console.log(array3);
+  console.log(array3);
 
   make_tests(array3);
 });
@@ -149,13 +150,23 @@ function make_tests(array3) {
           }
           //console.log("./sim_prol -p " + array3[problems].exec_path);
           //stddout
-          console.log("Problem " + array3[problems].problem + ":");
+          //console.log("Problem " + array3[problems].problem + ":");
           console.log(`${stdout}`);
+
+          let stdoutR = {
+            problem: array3[problems].problem,
+            stdout: `${stdout}`,
+          };
+          resultado.push(stdoutR);
         }
       );
     }
   });
 }
+
+app.get("/test", function routeHandler(req, res) {
+  res.send(resultado);
+});
 
 app.listen(3001, function () {
   //console.log("Server started on port 3001");
